@@ -8,10 +8,22 @@ This is a simple web service built with Go and Gin that receives ZeroTier Centra
 - Logs event details (network, device, userID) to a database.
 - Exposes an HTTP endpoint to search for stored events by network, device, or user ID.
 
+## TL;DR
+
+Please check the `Makefile` to make the life easier.
+
+- running tests: `make test`
+- generate mocks (optional - make sure a global mockgen binart is installed - otherwise skip): `make generate-mocks`
+- running docker container: `make docker-run`
+- jump to [API Endpoints](#api-endpoints)
+
 ## Prerequisites
 
 - For local setup: Go 1.21.3 or higher installed on your machine.
 - For Docker setup: Docker installed on your machine.
+- To generate more mocks (or update the existing ones), `mockgen` should be globally installed.
+  But if no change is required, then the existing mocks can be used without having a global `mockgen`
+  installed.
 
 ## Setup
 
@@ -93,6 +105,31 @@ Regardless of the setup method you choose, the service will be available at `htt
       "hook_id": "abc123",
       "hook_type": "NETWORK_JOIN",
       "org_id": "org456"
+    }
+    ```
+
+### 2. Search Events
+
+- **Endpoint:** `/events/search`
+- **Method:** `GET`
+- **Content-Type:** `application/json`
+- **Query Parameters:** `network_id`, `user_id`, `member_id`
+
+- **Response:**
+
+    ```json
+    {
+        "events": [
+            {
+                "id": 1,
+                "hook_id": "abc123",
+                "org_id": "org456",
+                "hook_type": "NETWORK_JOIN",
+                "network_id": "net789",
+                "member_id": "mem012",
+                "created_at": "2024-08-18T18:33:57Z"
+            }
+        ]
     }
     ```
 
