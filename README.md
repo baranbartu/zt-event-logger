@@ -13,9 +13,10 @@ This is a simple web service built with Go and Gin that receives ZeroTier Centra
 Please check the `Makefile` to make the life easier.
 
 - running tests: `make test`
-- generate mocks (optional - make sure a global mockgen binary is installed - otherwise skip): `make generate-mocks`
+- generate mocks (optional - make sure a global `mockgen` binary is installed - otherwise skip): `make generate-mocks`
 - running docker container: `make docker-run`
-- jump to [API Endpoints](#api-endpoints)
+- jump to [API Endpoints](#api-endpoints) for testing
+- jump to [Potential Improvements](#potential-improvements) for seeing my thought process
 
 ## Prerequisites
 
@@ -218,3 +219,60 @@ curl -X GET "http://localhost:8080/events/search?org_id=org456"
 ```bash
 curl -X GET "http://localhost:8080/events/search?org_id=org456&member_id=mem012"
 ```
+
+## Potential Improvements
+
+### Configuration Management
+
+- I'd use a configuration library like `viper` to manage configurations. This allows for more flexible configuration management, including support for environment variables, configuration files, and more.
+
+### Error Handling
+
+- I'd improve error handling by providing more context and using a structured error handling library like `pkg/errors`.
+- I'd ensure that all errors are logged with sufficient context to aid debugging.
+
+### Logging
+
+- I'd integrate a structured logging library like `logrus` or `zap` for better logging.
+- I'd ensure all critical operations are logged, including API requests, database operations, and error occurrences.
+
+### Validation
+
+- I'd use validation libraries like `go-playground/validator` to validate incoming request payloads.
+- I'd ensure that all user inputs are validated to prevent invalid data from entering the system.
+
+### Security
+
+- I'd use HTTPS for all communications to ensure data encryption in transit.
+- I'd validate the `X-ZTC-Signature` header to ensure the integrity and authenticity of incoming requests.
+- I'd store sensitive information like the pre-shared key securely and avoid hardcoding it in the codebase.
+
+### Metrics and Monitoring
+
+- I'd integrate metrics collection using libraries like `prometheus/client_golang` to monitor the health and performance of the application.
+- I'd set up monitoring and alerting to detect and respond to issues promptly.
+
+### Testing
+
+- I'd increase test coverage to include more edge cases and failure scenarios.
+- I'd use table-driven tests to simplify and organize test cases.
+- I'd ensure that tests are run in a CI/CD pipeline to catch issues early.
+
+### Documentation
+
+- I'd provide comprehensive documentation for the API endpoints, including request and response formats, error codes, and usage examples.
+- I'd document the setup and deployment process, including environment variables and configuration options.
+
+### Containerization
+
+- I'd optimize the Dockerfile to reduce the image size and improve build times.
+
+### CI/CD
+
+- I'd set up a CI/CD pipeline using tools like GitHub Actions, GitLab CI, or Jenkins to automate testing, building, and deployment.
+- I'd ensure that code quality checks, tests, and security scans are part of the CI/CD pipeline.
+
+### Storage Layer
+
+- I would use a production-ready database (or cluster), which means its redundancy is considered,
+  it is fault-tolerant, and it is backed up constantly.
