@@ -13,7 +13,7 @@ This is a simple web service built with Go and Gin that receives ZeroTier Centra
 Please check the `Makefile` to make the life easier.
 
 - running tests: `make test`
-- generate mocks (optional - make sure a global mockgen binart is installed - otherwise skip): `make generate-mocks`
+- generate mocks (optional - make sure a global mockgen binary is installed - otherwise skip): `make generate-mocks`
 - running docker container: `make docker-run`
 - jump to [API Endpoints](#api-endpoints)
 
