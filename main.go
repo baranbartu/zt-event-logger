@@ -57,6 +57,14 @@ func main() {
 		panic(err)
 	}
 
+	router := ConfigureRouter(config, dbClient, eventProcessor)
+
+	// Start the server on port PORT - default 8080
+	router.Run(":8080")
+}
+
+// ConfigureRouter is used to configure router and define endpoints in a way that is reusable
+func ConfigureRouter(config *config, dbClient db.DB, eventProcessor events.Processor) *gin.Engine {
 	router := gin.Default()
 
 	// POST endpoint to receive ZeroTier event hooks
@@ -116,6 +124,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"events": events})
 	})
 
-	// Start the server on port PORT - default 8080
-	router.Run(":8080")
+	return router
 }
