@@ -1,111 +1,63 @@
 package main
 
-// import (
-// 	"testing"
+import (
+	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-// 	. "github.com/onsi/ginkgo/v2"
-// 	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
-// 	"github.com/gin-gonic/gin"
+	"go.uber.org/mock/gomock"
 
-// 	"zt-event-logger/db"
-// 	"zt-event-logger/mocks"
-// )
+	"github.com/gin-gonic/gin"
+	"github.com/zerotier/ztchooks"
 
-// func TestMain(t *testing.T) {
-// 	RegisterFailHandler(Fail)
-// 	RunSpecs(t, "Main Suite")
-// }
+	"zt-event-logger/mocks"
+)
 
-// var _ = Describe("Event Receiver", func() {
-// 	var (
-// 		mockOrgsAPI *mocks.MockOrganizationsAPI
-// 		mocksSTSAPI *mocks.MockSTSAPI
-// 		ctx         context.Context
-// 		controller  *gomock.Controller
-// 	)
+func TestMain(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Main Suite")
+}
 
-// 	BeforeEach(func() {
-// 		controller = gomock.NewController(GinkgoT())
-// 		mockOrgsAPI = mocks.NewMockOrganizationsAPI(controller)
-// 		mocksSTSAPI = mocks.NewMockSTSAPI(controller)
-// 		ctx = context.Background()
-// 	})
+var _ = Describe("Router", func() {
 
-// 	AfterEach(func() {
-// 		controller.Finish()
-// 	})
+	var (
+		controller    *gomock.Controller
+		mockDBClient  *mocks.MockDB
+		mockProcessor *mocks.MockProcessor
+		mockConfig    *config
+		router        *gin.Engine
+	)
 
-// 	BeforeEach(func() {
-// 		gin.SetMode(gin.TestMode)
+	BeforeEach(func() {
+		controller = gomock.NewController(GinkgoT())
+		mockDBClient = mocks.NewMockDB(controller)
+		mockProcessor = mocks.NewMockProcessor(controller)
+		mockConfig = &config{dbFileLocation: "/tmp/zt.db"}
+		router = ConfigureRouter(mockConfig, mockDBClient, mockProcessor)
+	})
 
-// 		mockDBClient = &db.MockDBClient{}
-// 		mockProcessor = &events.MockProcessor{}
+	AfterEach(func() {
+		controller.Finish()
+	})
 
-// 		mockProcessor.ProcessFunc = func(payload []byte, opts ...events.SignatureOpt) (*db.HookBase, error) {
-// 			return mockHookBase, nil
-// 		}
+	Context("POST /events/receive", func() {
+		It("should receive and process the event successfully", func() {
+			rawPayload := []byte(`{"hook_id":"abc123","org_id":"org456","hook_type":"NETWORK_JOIN","network_id":"net789","member_id":"mem012"}`)
+			mockHookBase := &ztchooks.HookBase{HookID: "abc123", OrgID: "org456", HookType: "NETWORK_JOIN"}
 
-// 		router = gin.Default()
-// 		router.POST("/events/receive", func(c *gin.Context) {
-// 			rawPayload, err := io.ReadAll(c.Request.Body)
-// 			if err != nil {
-// 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 				return
-// 			}
+			mockProcessor.EXPECT().Process(gomock.Any(), gomock.Any()).Return(mockHookBase, nil)
 
-// 			signature := c.GetHeader("X-ZTC-Signature")
-// 			psk := preSharedKey
+			req, _ := http.NewRequest("POST", "/events/receive", bytes.NewBuffer(rawPayload))
 
-// 			hookBase, err := mockProcessor.Process(rawPayload, events.WithSignatureInfo(signature, psk))
-// 			if err != nil {
-// 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 				return
-// 			}
+			rr := httptest.NewRecorder()
+			router.ServeHTTP(rr, req)
 
-// 			c.JSON(http.StatusOK, gin.H{
-// 				"message":   "Event received and logged successfully",
-// 				"hook_id":   hookBase.HookID,
-// 				"org_id":    hookBase.OrgID,
-// 				"hook_type": hookBase.HookType,
-// 			})
-// 		})
-// 	})
-
-// 	Context("POST /events/receive", func() {
-// 		It("should receive and process the event successfully", func() {
-// 			req, _ := http.NewRequest("POST", "/events/receive", bytes.NewBuffer(rawPayload))
-// 			req.Header.Set("X-ZTC-Signature", "test-signature")
-
-// 			rr := httptest.NewRecorder()
-// 			router.ServeHTTP(rr, req)
-
-// 			Expect(rr.Code).To(Equal(http.StatusOK))
-// 			Expect(rr.Body.String()).To(ContainSubstring("Event received and logged successfully"))
-// 		})
-
-// 		It("should return an error if the payload is invalid", func() {
-// 			req, _ := http.NewRequest("POST", "/events/receive", bytes.NewBuffer([]byte("invalid payload")))
-// 			req.Header.Set("X-ZTC-Signature", "test-signature")
-
-// 			rr := httptest.NewRecorder()
-// 			router.ServeHTTP(rr, req)
-
-// 			Expect(rr.Code).To(Equal(http.StatusInternalServerError))
-// 		})
-
-// 		It("should return an error if the processor fails", func() {
-// 			mockProcessor.ProcessFunc = func(payload []byte, opts ...events.SignatureOpt) (*db.HookBase, error) {
-// 				return nil, errors.New("processing error")
-// 			}
-
-// 			req, _ := http.NewRequest("POST", "/events/receive", bytes.NewBuffer(rawPayload))
-// 			req.Header.Set("X-ZTC-Signature", "test-signature")
-
-// 			rr := httptest.NewRecorder()
-// 			router.ServeHTTP(rr, req)
-
-// 			Expect(rr.Code).To(Equal(http.StatusInternalServerError))
-// 		})
-// 	})
-// })
+			Expect(rr.Code).To(Equal(http.StatusOK))
+			Expect(rr.Body.String()).To(ContainSubstring("Event received and logged successfully"))
+		})
+	})
+})
