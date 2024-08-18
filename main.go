@@ -86,6 +86,36 @@ func main() {
 		})
 	})
 
+	// GET endpoint to search for events
+	router.GET("/events/search", func(c *gin.Context) {
+		// Extract query parameters
+		networkID := c.Query("network_id")
+		userID := c.Query("user_id")
+		memberID := c.Query("member_id")
+
+		// Prepare search criteria
+		criterias := []db.QueryOpt{}
+		if networkID != "" {
+			criterias = append(criterias, db.WithNetworkID(networkID))
+		}
+		if userID != "" {
+			criterias = append(criterias, db.WithUserID(userID))
+		}
+		if memberID != "" {
+			criterias = append(criterias, db.WithMemberID(memberID))
+		}
+
+		// Query the database
+		events, err := dbClient.Search(criterias...)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Respond with the search results
+		c.JSON(http.StatusOK, gin.H{"events": events})
+	})
+
 	// Start the server on port PORT - default 8080
 	router.Run(":8080")
 }

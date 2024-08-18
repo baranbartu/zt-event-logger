@@ -167,3 +167,17 @@ curl -X POST http://localhost:8080/events/receive \
            "user_email": "user@example.com"
          }'
 ```
+
+### Example cURL Requests For Searching Events
+
+```bash
+curl -X GET "http://localhost:8080/events/search?network_id=net789"
+```
+
+```bash
+curl -X GET "http://localhost:8080/events/search?org_id=org456"
+```
+
+```bash
+curl -X GET "http://localhost:8080/events/search?org_id=org456&member_id=mem012"
+```

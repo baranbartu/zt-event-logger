@@ -10,36 +10,39 @@ import (
 type DB interface {
 	// Insert inserts an event into the database
 	Insert(event *Event) error
+	// Search makes a `select` query to database and returns all the recorded events based on a
+	// given query criteria
+	Search(opts ...QueryOpt) ([]Event, error)
 }
 
-// Query is used when a granular query structure with network, device (member), or/and user ID are
+// QueryCriteria is used when a granular query structure with network, device (member), or/and user ID are
 // needed
-type Query struct {
+type QueryCriteria struct {
 	NetworkID string
 	MemberID  string
 	UserID    string
 }
 
 // QueryOpt is a way to abstract AdditionalQuery construction and func signature for its usages
-type QueryOpt func(aq *Query)
+type QueryOpt func(aq *QueryCriteria)
 
 // WithNetworkID us used when query should contain NetworkID
 func WithNetworkID(networkID string) QueryOpt {
-	return func(q *Query) {
+	return func(q *QueryCriteria) {
 		q.NetworkID = networkID
 	}
 }
 
 // WithMemberID us used when query should contain MemberID
 func WithMemberID(memberID string) QueryOpt {
-	return func(q *Query) {
+	return func(q *QueryCriteria) {
 		q.MemberID = memberID
 	}
 }
 
 // WithUserID us used when query should contain UserID
 func WithUserID(userID string) QueryOpt {
-	return func(q *Query) {
+	return func(q *QueryCriteria) {
 		q.MemberID = userID
 	}
 }
