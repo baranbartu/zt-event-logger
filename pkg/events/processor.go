@@ -98,7 +98,7 @@ func (p *processor) cleanSignatureInfo() {
 
 // verify verifies the payload
 func (p *processor) verify(payload []byte) error {
-	if p.signature != "" {
+	if p.signature != "" && p.preSharedKey != "" {
 		err := ztchooks.VerifyHookSignature(p.preSharedKey, p.signature, payload, ztchooks.DefaultTolerance)
 		if err != nil {
 			return err
