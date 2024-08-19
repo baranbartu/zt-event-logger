@@ -276,3 +276,11 @@ curl -X GET "http://localhost:8080/events/search?org_id=org456&member_id=mem012"
 
 - I would use a production-ready database (or cluster), which means its redundancy is considered,
   it is fault-tolerant, and it is backed up constantly.
+
+### Database Schema Design
+
+- I have currently treated the event data as schemaless because the attributes can vary between different events.
+  Consequently, even though not all events share the same attributes, the database table's schema is strictly defined.
+  I am open to reevaluating this design by weighing the pros and cons. One alternative approach could involve using columns
+  for attributes that are common across events and utilizing a JSON-like column to store the remaining event-specific data.
+  This could offer a different perspective on database table design.
