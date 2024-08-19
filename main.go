@@ -12,15 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// EventRequest represents the payload for a ZeroTier Central event hook.
-// It includes details about the network, device, and user associated with the event.
-// This struct is used to log the event information in the system.
-type EventRequest struct {
-	Network string `json:"network" binding:"required"` // Network is the identifier of the ZeroTier network.
-	Device  string `json:"device" binding:"required"`  // Device is the name or identifier of the device involved in the event.
-	UserID  int    `json:"userID" binding:"required"`  // UserID is the unique identifier of the user associated with the event.
-}
-
 type config struct {
 	dbFileLocation string
 	preSharedKey   string
@@ -59,7 +50,6 @@ func main() {
 
 	router := ConfigureRouter(config, dbClient, eventProcessor)
 
-	// Start the server on port PORT - default 8080
 	router.Run(":8080")
 }
 

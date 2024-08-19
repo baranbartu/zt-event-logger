@@ -24,7 +24,7 @@ type QueryCriteria struct {
 }
 
 // QueryOpt is a way to abstract AdditionalQuery construction and func signature for its usages
-type QueryOpt func(aq *QueryCriteria)
+type QueryOpt func(q *QueryCriteria)
 
 // WithNetworkID us used when query should contain NetworkID
 func WithNetworkID(networkID string) QueryOpt {
